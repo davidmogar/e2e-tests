@@ -138,7 +138,7 @@ func (h *SuiteController) GetComponentPipeline(componentName string, application
 	if len(list.Items) > 0 {
 		return list.Items[0], nil
 	} else if len(list.Items) == 0 {
-		return v1beta1.PipelineRun{}, fmt.Errorf("no pipelinerun found for component ", componentName)
+		return v1beta1.PipelineRun{}, fmt.Errorf("no pipelinerun found for component %s", componentName)
 	}
 	return v1beta1.PipelineRun{}, err
 }
@@ -239,7 +239,7 @@ func (h *SuiteController) DeleteTestNamespace(name string) (*corev1.Namespace, e
 		}
 		// klog.Error("error when trying to get namespace '%s' namespace: %v", name, err)
 	} else {
-		klog.Info("namespace '%s' is deleted!")
+		klog.Info("namespace '%s' is deleted!", ns.Name)
 		return nil, h.KubeInterface().CoreV1().Namespaces().Delete(context.TODO(), ns.Name, metav1.DeleteOptions{})
 	}
 	return nil, fmt.Errorf("error when deleting'%s' namespace: %v", name, err)
