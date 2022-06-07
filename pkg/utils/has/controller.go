@@ -138,7 +138,7 @@ func (h *SuiteController) GetComponentPipeline(componentName string, application
 	if len(list.Items) > 0 {
 		return list.Items[0], nil
 	} else if len(list.Items) == 0 {
-		return v1beta1.PipelineRun{}, fmt.Errorf("no pipelinerun found for component %s", componentName)
+		return v1beta1.PipelineRun{}, fmt.Errorf("no pipelinerun found for component ", componentName)
 	}
 	return v1beta1.PipelineRun{}, err
 }
