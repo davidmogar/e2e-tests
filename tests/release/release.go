@@ -47,7 +47,9 @@ var _ = framework.ReleaseStrategyDescribe("test-demo", func() {
 	AfterAll(func() {
 
 		_, err := framework.HasController.DeleteTestNamespace(DemoNamespace)
+		Expect(err).NotTo(HaveOccurred())
 		_, err = framework.HasController.DeleteTestNamespace(ManagedNamespace)
+		Expect(err).NotTo(HaveOccurred())
 		klog.Info("AfetrAll is Done!: ", err)
 	})
 
