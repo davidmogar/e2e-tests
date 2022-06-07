@@ -66,7 +66,7 @@ func (s *SuiteController) GetRelease(namespace string) (*release.Release, error)
 
 	err := s.KubeRest().List(context.TODO(), releases, rclient.InNamespace(namespace))
 	if len(releases.Items) == 1 {
-		return &releases.Items[0], nil
+		return &releases.Items[0], err
 	}
 	return nil, err
 }
