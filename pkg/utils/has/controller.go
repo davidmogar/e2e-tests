@@ -239,7 +239,7 @@ func (h *SuiteController) DeleteTestNamespace(name string) (*corev1.Namespace, e
 		}
 		// klog.Error("error when trying to get namespace '%s' namespace: %v", name, err)
 	} else {
-		klog.Info("namespace '%s' is deleted!", ns.Name)
+		klog.Info("namespace is deleted!: ", ns.Name)
 		return nil, h.KubeInterface().CoreV1().Namespaces().Delete(context.TODO(), ns.Name, metav1.DeleteOptions{})
 	}
 	return nil, fmt.Errorf("error when deleting'%s' namespace: %v", name, err)
