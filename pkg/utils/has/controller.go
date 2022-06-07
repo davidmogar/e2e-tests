@@ -233,8 +233,8 @@ func (h *SuiteController) DeleteTestNamespace(name string) (*corev1.Namespace, e
 
 	if err != nil {
 		if k8sErrors.IsNotFound((err)) {
-			klog.Info("namespace '%s' does not exist in cluster!", ns.Name)
-			return nil, fmt.Errorf("namespace '%s' is not on cluster!", ns.Name)
+			klog.Info("namespace does not exist in cluster!: ", ns.Name)
+			return nil, fmt.Errorf("namespace is not on cluster!:%s ", ns.Name)
 			// return h.KubeInterface().CoreV1().Namespaces().Delete(context.TODO(), ns.Name, metav1.DeleteOptions{})
 		}
 		// klog.Error("error when trying to get namespace '%s' namespace: %v", name, err)
