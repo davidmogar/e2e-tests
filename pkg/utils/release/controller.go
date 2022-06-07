@@ -128,8 +128,9 @@ func (s *SuiteController) GetPipelineRunInNamespace(namespace string) (*v1beta1.
 	pipelineruns := &v1beta1.PipelineRunList{}
 
 	err := s.KubeRest().List(context.TODO(), pipelineruns, rclient.InNamespace(namespace))
+
 	if len(pipelineruns.Items) >= 1 {
-		return &pipelineruns.Items[0], nil
+		return &pipelineruns.Items[0], err
 	}
 	return nil, err
 }
