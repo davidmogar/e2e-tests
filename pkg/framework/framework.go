@@ -57,6 +57,9 @@ func NewFramework() (*Framework, error) {
 
 	// Initialize SPI controller
 	spiController, err := spi.NewSuiteController(kubeClient)
+	if err != nil {
+		return nil, err
+	}
 
 	// Initialize Release Controller
 	releaseController, err := release.NewSuiteController(kubeClient)
