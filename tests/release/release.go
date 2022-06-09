@@ -43,16 +43,6 @@ var _ = framework.ReleaseStrategyDescribe("test-demo", func() {
 		Expect(err).NotTo(HaveOccurred(), "Error when creating/updating '%s' namespace: %v", namespace.Name, err)
 	})
 
-	// teardown after test is ened
-	AfterAll(func() {
-
-		_, err := framework.HasController.DeleteTestNamespace(DemoNamespace)
-		Expect(err).NotTo(HaveOccurred())
-		_, err = framework.HasController.DeleteTestNamespace(ManagedNamespace)
-		Expect(err).NotTo(HaveOccurred())
-		klog.Info("AfetrAll is Done!: ", err)
-	})
-
 	// Create resources for Happy Path demo
 	var _ = Describe("Happy-path test", func() {
 
