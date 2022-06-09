@@ -2,6 +2,7 @@ package release
 
 import (
 	"strings"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -26,7 +27,7 @@ const (
 	Image_3               = "quay.io/redhat-appstudio/component3@sha256:d90a0a33e4c5a1daf5877f8dd989a570bfae4f94211a8143599245e503775b1f"
 )
 
-var timeout = 600
+var timeout = 300
 var interval = 1
 var _ = framework.ReleaseStrategyDescribe("test-demo", func() {
 	defer GinkgoRecover()
@@ -41,6 +42,17 @@ var _ = framework.ReleaseStrategyDescribe("test-demo", func() {
 
 		namespace, err := framework.HasController.CreateTestNamespace(ManagedNamespace)
 		Expect(err).NotTo(HaveOccurred(), "Error when creating/updating '%s' namespace: %v", namespace.Name, err)
+
+	})
+
+	// teardown after test is ened
+	AfterAll(func() {
+
+		_, err := framework.HasController.DeleteTestNamespace(DemoNamespace)
+		Expect(err).NotTo(HaveOccurred())
+		_, err = framework.HasController.DeleteTestNamespace(ManagedNamespace)
+		Expect(err).NotTo(HaveOccurred())
+		klog.Info("AfetrAll is Done!: ", err)
 	})
 
 	// Create resources for Happy Path demo
@@ -89,14 +101,19 @@ var _ = framework.ReleaseStrategyDescribe("test-demo", func() {
 				klog.Info("Release has not been created yet.")
 				Expect(err).NotTo(HaveOccurred())
 			}
+			flag := false
 			split := strings.Split(currentrelease.Status.ReleasePipelineRun, "/")
-			if len(split) > 1 {
+			if len(split) < 1 {
+				time.Sleep(150)
+				flag = true
+			} else {
 				releaseNamespace, releasePr := split[0], split[1]
 				klog.Info("Pipeline in Release: ", releasePr)
 				klog.Info("NameSpace from Release: ", releaseNamespace)
 				Expect(releasePr).Should(Equal(pr.Name))
 				Expect(releaseNamespace).Should(Equal(ManagedNamespace))
-			} else {
+			}
+			if flag == true {
 				klog.Infof("The value of PipelineRun from Release is empty! split value: %v", split)
 			}
 		})
