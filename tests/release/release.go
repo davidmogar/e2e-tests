@@ -113,7 +113,7 @@ var _ = framework.ReleaseStrategyDescribe("test-demo", func() {
 				Expect(releasePr).Should(Equal(pr.Name))
 				Expect(releaseNamespace).Should(Equal(ManagedNamespace))
 			}
-			if flag == true {
+			if flag {
 				klog.Infof("The value of PipelineRun from Release is empty! split value: %v", split)
 			}
 		})
