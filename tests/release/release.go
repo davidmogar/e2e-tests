@@ -103,8 +103,8 @@ var _ = framework.ReleaseStrategyDescribe("test-demo", func() {
 				flag = true
 			} else {
 				// releaseNamespace, releasePr := split[0], split[1]
-				klog.Info("Pipeline in Release: ", split[0])
-				klog.Info("NameSpace from Release: ", split[1])
+				klog.Info("Pipeline in Release: ") //, split[0])
+				//klog.Info("NameSpace from Release: ", split[1])
 				// Expect(releasePr).Should(Equal(pr.Name))
 				// Expect(releaseNamespace).Should(Equal(ManagedNamespace))
 			}
