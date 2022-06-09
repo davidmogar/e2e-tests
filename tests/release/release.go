@@ -84,11 +84,6 @@ var _ = framework.ReleaseStrategyDescribe("test-demo", func() {
 		})
 	})
 
-	// 1-The release Succeeded True
-	// 2-The release Reason is Succeeded
-	// 3-There's a PR in the managed workspace
-	// 4-The ReleasePipelineRun in the release status points to an existing PR (you can leave this for M5)
-	//
 	// Verification of test resources: Demo
 	var _ = Describe("Happy-path Test Verification", func() {
 
