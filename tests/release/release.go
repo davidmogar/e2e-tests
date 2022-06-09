@@ -117,7 +117,7 @@ var _ = framework.ReleaseStrategyDescribe("test-demo", func() {
 		It("Status of Release created should be true ", func() {
 			Eventually(func() string {
 				currentrelease, err := framework.ReleaseController.GetRelease(DemoNamespace)
-				if err != nil {
+				if err != nil || currentrelease == nil {
 					klog.Info("Release has not been created yet.")
 					return "Unknown"
 				}
