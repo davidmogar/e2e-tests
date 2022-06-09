@@ -100,14 +100,14 @@ var _ = framework.ReleaseStrategyDescribe("test-demo", func() {
 				Expect(err).NotTo(HaveOccurred())
 			}
 			split := strings.Split(currentrelease.Status.ReleasePipelineRun, "/")
-			if len(split) > 0 {
+			if len(split) > 1 {
 				releaseNamespace, releasePr := split[0], split[1]
 				klog.Info("Pipeline in Release: ", releasePr)
 				klog.Info("NameSpace from Release: ", releaseNamespace)
 				Expect(releasePr).Should(Equal(pr.Name))
 				Expect(releaseNamespace).Should(Equal(ManagedNamespace))
 			} else {
-				klog.Info("The value of PipelineRun from Release is empty!")
+				klog.Infof("The value of PipelineRun from Release is empty! split value: %v", split)
 			}
 		})
 
