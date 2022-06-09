@@ -46,14 +46,14 @@ var _ = framework.ReleaseStrategyDescribe("test-demo", func() {
 	})
 
 	// teardown after test is ened
-	AfterAll(func() {
+	// AfterAll(func() {
 
-		_, err := framework.HasController.DeleteTestNamespace(DemoNamespace)
-		Expect(err).NotTo(HaveOccurred())
-		_, err = framework.HasController.DeleteTestNamespace(ManagedNamespace)
-		Expect(err).NotTo(HaveOccurred())
-		klog.Info("AfetrAll is Done!: ", err)
-	})
+	// 	_, err := framework.HasController.DeleteTestNamespace(DemoNamespace)
+	// 	Expect(err).NotTo(HaveOccurred())
+	// 	_, err = framework.HasController.DeleteTestNamespace(ManagedNamespace)
+	// 	Expect(err).NotTo(HaveOccurred())
+	// 	klog.Info("AfetrAll is Done!: ", err)
+	// })
 
 	// Create resources for Happy Path demo
 	var _ = Describe("Happy-path test", func() {
@@ -144,6 +144,14 @@ var _ = framework.ReleaseStrategyDescribe("test-demo", func() {
 				klog.Info("Release Reason: ", releaseReason)
 				return releaseReason
 			}, timeout, interval).Should(Equal("Succeeded"), "timed out when waiting for the Release Reason be Succeeded")
+		})
+
+		It("Delete Namespaces of test ", func() {
+			_, err := framework.HasController.DeleteTestNamespace(DemoNamespace)
+			Expect(err).NotTo(HaveOccurred())
+			_, err = framework.HasController.DeleteTestNamespace(ManagedNamespace)
+			Expect(err).NotTo(HaveOccurred())
+			klog.Info("AfetrAll is Done!: ", err)
 		})
 
 	})
