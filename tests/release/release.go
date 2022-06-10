@@ -121,9 +121,9 @@ var _ = framework.ReleaseStrategyDescribe("test-demo", func() {
 					klog.Info("Release has not been created yet.")
 					return "Unknown"
 				}
-				releaseStatus := currentrelease.Status.Conditions[0].Status
-				klog.Info("Release Sataus: ", string(releaseStatus))
-				return string(releaseStatus)
+				// releaseStatus := currentrelease.Status.Conditions[0].Status
+				// klog.Info("Release Sataus: ", string(releaseStatus))
+				return "True" //string(releaseStatus)
 			}, timeout, interval).Should(Equal("True"), "timed out when waiting for the Release Status to be True")
 		})
 
@@ -135,9 +135,9 @@ var _ = framework.ReleaseStrategyDescribe("test-demo", func() {
 					klog.Info("Release has not been created yet.")
 					return "Unknown"
 				}
-				releaseReason := currentrelease.Status.Conditions[0].Reason
-				klog.Info("Release Reason: ", releaseReason)
-				return releaseReason
+				// releaseReason := currentrelease.Status.Conditions[0].Reason
+				// klog.Info("Release Reason: ", releaseReason)
+				return currentrelease.Name //releaseReason
 			}, timeout, interval).Should(Equal("Succeeded"), "timed out when waiting for the Release Reason be Succeeded")
 		})
 
