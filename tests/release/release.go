@@ -27,7 +27,7 @@ const (
 	Image_3               = "quay.io/redhat-appstudio/component3@sha256:d90a0a33e4c5a1daf5877f8dd989a570bfae4f94211a8143599245e503775b1f"
 )
 
-var timeout = 300
+var timeout = 200
 var interval = 1
 var _ = framework.ReleaseStrategyDescribe("test-demo", func() {
 	defer GinkgoRecover()
