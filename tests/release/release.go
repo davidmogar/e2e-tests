@@ -1,153 +1,135 @@
 package release
 
 import (
-	"strings"
-	"time"
-
+	"fmt"
+	"github.com/google/uuid"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/redhat-appstudio/e2e-tests/pkg/framework"
-	"k8s.io/klog/v2"
+	"github.com/redhat-appstudio/release-service/api/v1alpha1"
+	"github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
+	"k8s.io/apimachinery/pkg/api/meta"
+	"knative.dev/pkg/apis"
+	"time"
 )
 
 const (
-	DemoNamespace         = "demo"
-	ManagedNamespace      = "managed"
-	ApplicationSnapshot   = "m5-snapshot"
-	ReleaseLinkDemo       = "m5-release-link-demo"
-	ReleaseLinkManaged    = "m5-release-link-managed"
-	ReleaseStrategy       = "m5-strategy"
-	ReleaseName           = "m5-release"
-	ComponentName         = "m4-component"
-	Pipeline              = "release-pipeline"
-	ApplicationName       = "m5-app"
-	ReleaseStrategyBundle = "quay.io/hacbs-release/demo:m5-alpine"
-	Image_1               = "quay.io/redhat-appstudio/component1@sha256:d5e85e49c89df42b221d972f5b96c6507a8124717a6e42e83fd3caae1031d514"
-	Image_2               = "quay.io/redhat-appstudio/component2@sha256:a01dfd18cf8ca8b68770b09a9b6af0fd7c6d1f8644c7ab97f0e06c34dfc5860e"
-	Image_3               = "quay.io/redhat-appstudio/component3@sha256:d90a0a33e4c5a1daf5877f8dd989a570bfae4f94211a8143599245e503775b1f"
+	snapshotName          = "snapshot"
+	sourceReleaseLinkName = "source-release-link"
+	targetReleaseLinkName = "target-release-link"
+	releaseStrategyName   = "strategy"
+	releaseName           = "release"
+	releasePipelineName   = "release-pipeline"
+	applicationName       = "application"
+	releasePipelineBundle = "quay.io/hacbs-release/demo:m5-alpine"
+
+	avgPipelineCompletionTime = 2 * time.Minute
+	defaultInterval           = 100 * time.Millisecond
 )
 
-var timeout = 300
-var interval = 1
+var snapshotImages = []v1alpha1.Image{
+	{"component-1", "quay.io/redhat-appstudio/component1@sha256:d5e85e49c89df42b221d972f5b96c6507a8124717a6e42e83fd3caae1031d514"},
+	{"component-2", "quay.io/redhat-appstudio/component2@sha256:a01dfd18cf8ca8b68770b09a9b6af0fd7c6d1f8644c7ab97f0e06c34dfc5860e"},
+	{"component-3", "quay.io/redhat-appstudio/component3@sha256:d90a0a33e4c5a1daf5877f8dd989a570bfae4f94211a8143599245e503775b1f"},
+}
+
 var _ = framework.ReleaseStrategyDescribe("test-demo", func() {
 	defer GinkgoRecover()
 	// Initialize the tests controllers
 	framework, err := framework.NewFramework()
 	Expect(err).NotTo(HaveOccurred())
 
-	// Create required resources before Test
+	var devNamespace = uuid.New().String()
+	var managedNamespace = uuid.New().String()
+
 	BeforeAll(func() {
-		demo, err := framework.HasController.CreateTestNamespace(DemoNamespace)
-		Expect(err).NotTo(HaveOccurred(), "Error when creating/updating '%s' namespace: %v", demo.Name, err)
+		// Create the dev namespace
+		demo, err := framework.HasController.CreateTestNamespace(devNamespace)
+		Expect(err).NotTo(HaveOccurred(), "Error when creating namespace '%s': %v", demo.Name, err)
 
-		namespace, err := framework.HasController.CreateTestNamespace(ManagedNamespace)
-		Expect(err).NotTo(HaveOccurred(), "Error when creating/updating '%s' namespace: %v", namespace.Name, err)
-
+		// Create the managed namespace
+		namespace, err := framework.HasController.CreateTestNamespace(managedNamespace)
+		Expect(err).NotTo(HaveOccurred(), "Error when creating namespace '%s': %v", namespace.Name, err)
 	})
 
-	// teardown after test is ened
-	// AfterAll(func() {
+	AfterAll(func() {
+		// Delete the dev and managed namespaces with all the resources created in them
+		Expect(framework.ReleaseController.DeleteNamespace(devNamespace)).NotTo(HaveOccurred())
+		Expect(framework.ReleaseController.DeleteNamespace(managedNamespace)).NotTo(HaveOccurred())
+	})
 
-	// 	_, err := framework.HasController.DeleteTestNamespace(DemoNamespace)
-	// 	Expect(err).NotTo(HaveOccurred())
-	// 	_, err = framework.HasController.DeleteTestNamespace(ManagedNamespace)
-	// 	Expect(err).NotTo(HaveOccurred())
-	// 	klog.Info("AfetrAll is Done!: ", err)
-	// })
-
-	// Create resources for Happy Path demo
-	var _ = Describe("Happy-path test", func() {
-
-		It("Create a an ApplicationSnapshot for M5", func() {
-			_, err := framework.ReleaseController.CreateApplicationSnapshot(ApplicationSnapshot, DemoNamespace, Image_1, Image_2, Image_3, ApplicationName)
+	var _ = Describe("Creation of the 'Happy path' resources", func() {
+		It("Create a an snapshotName for M5", func() {
+			_, err := framework.ReleaseController.CreateApplicationSnapshot(snapshotName, devNamespace, applicationName, snapshotImages)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("Create Release Strategy", func() {
-			_, err := framework.ReleaseController.CreateReleaseStrategy(ReleaseStrategy, ManagedNamespace, Pipeline, ReleaseStrategyBundle)
+			_, err := framework.ReleaseController.CreateReleaseStrategy(releaseStrategyName, managedNamespace, releasePipelineName, releasePipelineBundle)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
-		It("Create Release Link in namespace demo", func() {
-			_, err := framework.ReleaseController.CreateReleaseLink(ReleaseLinkDemo, DemoNamespace, "Users's ReleaseLink", ApplicationName, ManagedNamespace, "")
+		It("Create Release Link in dev namespace", func() {
+			_, err := framework.ReleaseController.CreateReleaseLink(sourceReleaseLinkName, devNamespace, applicationName, managedNamespace, "")
 			Expect(err).NotTo(HaveOccurred())
 		})
 
-		It("Create Release Link in namespace managed", func() {
-			_, err := framework.ReleaseController.CreateReleaseLink(ReleaseLinkManaged, ManagedNamespace, "Managed Workspace's ReleaseLink", ApplicationName, DemoNamespace, ReleaseStrategy)
+		It("Create Release Link in managed namespace", func() {
+			_, err := framework.ReleaseController.CreateReleaseLink(targetReleaseLinkName, managedNamespace, applicationName, devNamespace, releaseStrategyName)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
-		It("Create a Release for M5", func() {
-			_, err := framework.ReleaseController.CreateRelease(ReleaseName, DemoNamespace, ApplicationSnapshot, ReleaseLinkDemo)
+		It("Create a Release", func() {
+			_, err := framework.ReleaseController.CreateRelease(releaseName, devNamespace, snapshotName, sourceReleaseLinkName)
 			Expect(err).NotTo(HaveOccurred())
 		})
 	})
 
-	// Verification of test resources: Demo
-	var _ = Describe("Happy-path Test Verification", func() {
+	var _ = Describe("Post-release verification", func() {
+		It("A PipelineRun should have been created in the managed namespace", func() {
+			Eventually(func() error {
+				_, err := framework.ReleaseController.GetPipelineRunInNamespace(managedNamespace, releaseName, devNamespace)
 
-		// Check if there is a Pipelinerun in managed namespace
-		It("Test if a PipelineRun in managed namespace", func() {
-			_, err := framework.ReleaseController.GetPipelineRunInNamespace(ManagedNamespace)
-			Expect(err).NotTo(HaveOccurred())
-			currentrelease, err := framework.ReleaseController.GetRelease(DemoNamespace)
-			if err != nil {
-				klog.Info("Release has not been created yet.")
-				Expect(err).NotTo(HaveOccurred())
-			}
-			flag := false
-			split := strings.Split(currentrelease.Status.ReleasePipelineRun, "/")
-			if len(split) < 1 {
-				time.Sleep(150)
-				flag = true
-			} else {
-				// releaseNamespace, releasePr := split[0], split[1]
-				klog.Info("Pipeline in Release: ") //, split[0])
-				//klog.Info("NameSpace from Release: ", split[1])
-				// Expect(releasePr).Should(Equal(pr.Name))
-				// Expect(releaseNamespace).Should(Equal(ManagedNamespace))
-			}
-			if flag {
-				klog.Infof("The value of PipelineRun from Release is empty! split value: %v", split)
-			}
+				return err
+			}, 1*time.Minute, defaultInterval).Should(BeNil())
 		})
 
-		// Verify the release Status we expect it be True
-		It("Status of Release created should be true ", func() {
-			Eventually(func() string {
-				currentrelease, err := framework.ReleaseController.GetRelease(DemoNamespace)
-				if err != nil || currentrelease == nil {
-					klog.Info("Release has not been created yet.")
-					return "Unknown"
+		It("The PipelineRun should exist and succeed", func() {
+			Eventually(func() bool {
+				pipelineRun, err := framework.ReleaseController.GetPipelineRunInNamespace(managedNamespace, releaseName, devNamespace)
+
+				if pipelineRun == nil || err != nil {
+					return false
 				}
-				// releaseStatus := currentrelease.Status.Conditions[0].Status
-				// klog.Info("Release Sataus: ", string(releaseStatus))
-				return "True" //string(releaseStatus)
-			}, timeout, interval).Should(Equal("True"), "timed out when waiting for the Release Status to be True")
+
+				return pipelineRun.HasStarted() && pipelineRun.IsDone() && pipelineRun.Status.GetCondition(apis.ConditionSucceeded).IsTrue()
+			}, avgPipelineCompletionTime, defaultInterval).Should(BeTrue())
 		})
 
-		// Verify Release Reason, we expect it be Succeeded
-		It("Test Release Reason expexted to be Succeeded", func() {
-			Eventually(func() string {
-				currentrelease, err := framework.ReleaseController.GetRelease(DemoNamespace)
+		It("The Release should have succeeded", func() {
+			Eventually(func() bool {
+				release, err := framework.ReleaseController.GetRelease(releaseName, devNamespace)
+
 				if err != nil {
-					klog.Info("Release has not been created yet.")
-					return "Unknown"
+					return false
 				}
-				// releaseReason := currentrelease.Status.Conditions[0].Reason
-				// klog.Info("Release Reason: ", releaseReason)
-				return currentrelease.Name //releaseReason
-			}, timeout, interval).Should(Equal("Succeeded"), "timed out when waiting for the Release Reason be Succeeded")
+
+				return release.IsDone() && meta.IsStatusConditionTrue(release.Status.Conditions, "Succeeded")
+			}, avgPipelineCompletionTime, defaultInterval).Should(BeTrue())
 		})
 
-		It("Delete Namespaces of test ", func() {
-			_, err := framework.HasController.DeleteTestNamespace(DemoNamespace)
-			Expect(err).NotTo(HaveOccurred())
-			_, err = framework.HasController.DeleteTestNamespace(ManagedNamespace)
-			Expect(err).NotTo(HaveOccurred())
-			klog.Info("AfetrAll is Done!: ", err)
-		})
+		It("The Release should reference the release PipelineRun", func() {
+			var pipelineRun *v1beta1.PipelineRun
 
+			Eventually(func() bool {
+				pipelineRun, err = framework.ReleaseController.GetPipelineRunInNamespace(managedNamespace, releaseName, devNamespace)
+
+				return pipelineRun != nil && err == nil
+			}, avgPipelineCompletionTime, defaultInterval).Should(BeTrue())
+
+			release, err := framework.ReleaseController.GetRelease(releaseName, devNamespace)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(release.Status.ReleasePipelineRun).Should(Equal(fmt.Sprintf("%s/%s", pipelineRun.Namespace, pipelineRun.Name)))
+		})
 	})
 })
