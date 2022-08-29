@@ -64,18 +64,18 @@ var _ = framework.ReleaseSuiteDescribe("test-release-service-happy-path", Label(
 			Expect(err).NotTo(HaveOccurred())
 		})
 
-		It("Create ReleaseLink in dev namespace", func() {
-			_, err := framework.ReleaseController.CreateReleaseLink(sourceReleaseLinkName, devNamespace, applicationName, managedNamespace, "")
+		It("Create ReleasePlan in dev namespace", func() {
+			_, err := framework.ReleaseController.CreateReleasePlan(releasePlanName, devNamespace, applicationName, managedNamespace)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
-		It("Create ReleaseLink in managed namespace", func() {
-			_, err := framework.ReleaseController.CreateReleaseLink(targetReleaseLinkName, managedNamespace, applicationName, devNamespace, releaseStrategyName)
+		It("Create ReleasePlanAdmission in managed namespace", func() {
+			_, err := framework.ReleaseController.CreateReleasePlanAdmission(releasePlanAdmissionName, managedNamespace, applicationName, devNamespace, environment, releaseStrategyName)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("Create a Release", func() {
-			_, err := framework.ReleaseController.CreateRelease(releaseName, devNamespace, snapshotName, sourceReleaseLinkName)
+			_, err := framework.ReleaseController.CreateRelease(releaseName, devNamespace, snapshotName, releasePlanName)
 			Expect(err).NotTo(HaveOccurred())
 		})
 	})
@@ -92,7 +92,6 @@ var _ = framework.ReleaseSuiteDescribe("test-release-service-happy-path", Label(
 		It("The PipelineRun should exist and succeed", func() {
 			Eventually(func() bool {
 				pipelineRun, err := framework.ReleaseController.GetPipelineRunInNamespace(managedNamespace, releaseName, devNamespace)
-
 				if pipelineRun == nil || err != nil {
 					return false
 				}

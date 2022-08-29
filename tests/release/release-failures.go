@@ -25,7 +25,7 @@ var _ = framework.ReleaseSuiteDescribe("test-release-service-failures", Label("r
 	var devNamespace string
 	var managedNamespace string
 
-	var _ = Describe("Failure - Missing matching ReleaseLink", func() {
+	var _ = Describe("Failure - Missing matching ReleasePlanAdmission", func() {
 		BeforeAll(func() {
 			// Recreate random namespaces names per each test because if using same namespace names, the next test will not be able to create the namespaces as they are terminating
 			devNamespace = "user-" + uuid.New().String()
@@ -59,18 +59,18 @@ var _ = framework.ReleaseSuiteDescribe("test-release-service-failures", Label("r
 				Expect(err).NotTo(HaveOccurred())
 			})
 
-			It("Create ReleaseLink in dev namespace", func() {
-				_, err := framework.ReleaseController.CreateReleaseLink(sourceReleaseLinkName, devNamespace, applicationName, managedNamespace, "")
+			It("Create ReleasePlan in dev namespace", func() {
+				_, err := framework.ReleaseController.CreateReleasePlan(releasePlanName, devNamespace, applicationName, managedNamespace)
 				Expect(err).NotTo(HaveOccurred())
 			})
 
 			It("Create a Release in dev namespace", func() {
-				_, err := framework.ReleaseController.CreateRelease(releaseName, devNamespace, snapshotName, sourceReleaseLinkName)
+				_, err := framework.ReleaseController.CreateRelease(releaseName, devNamespace, snapshotName, releasePlanName)
 				Expect(err).NotTo(HaveOccurred())
 			})
 		})
 
-		var _ = Describe("A ReleaseLink has to have a matching one in a managed workspace", func() {
+		var _ = Describe("A ReleasePlan has to have a matching ReleasePlanAdmission in a managed workspace", func() {
 			It("The Release has failed with the REASON field set to ReleaseValidationError", func() {
 				Eventually(func() bool {
 					release, err := framework.ReleaseController.GetRelease(releaseName, devNamespace)
@@ -84,7 +84,7 @@ var _ = framework.ReleaseSuiteDescribe("test-release-service-failures", Label("r
 				}, avgPipelineCompletionTime, defaultInterval).Should(BeTrue())
 			})
 
-			It("Condition message describes an error finding a matching ReleaseLink", func() {
+			It("Condition message describes an error finding a matching ReleasePlanAdmission", func() {
 				Eventually(func() bool {
 					release, err := framework.ReleaseController.GetRelease(releaseName, devNamespace)
 
@@ -93,7 +93,7 @@ var _ = framework.ReleaseSuiteDescribe("test-release-service-failures", Label("r
 					}
 
 					releaseMessage := release.Status.Conditions[0].Message
-					return Expect(releaseMessage).Should(ContainSubstring("no ReleaseLink found in target workspace"))
+					return Expect(releaseMessage).Should(ContainSubstring("no ReleasePlanAdmission found in the target"))
 				}, avgPipelineCompletionTime, defaultInterval).Should(BeTrue())
 			})
 		})
@@ -125,23 +125,24 @@ var _ = framework.ReleaseSuiteDescribe("test-release-service-failures", Label("r
 				Expect(err).NotTo(HaveOccurred())
 			})
 
-			It("Create ReleaseLink in dev namespace", func() {
-				_, err := framework.ReleaseController.CreateReleaseLink(sourceReleaseLinkName, devNamespace, applicationName, managedNamespace, "")
+			It("Create ReleasePlan in dev namespace", func() {
+				_, err := framework.ReleaseController.CreateReleasePlan(releasePlanName, devNamespace, applicationName, managedNamespace)
 				Expect(err).NotTo(HaveOccurred())
 			})
 
-			It("Create ReleaseLink in managed namespace", func() {
-				_, err := framework.ReleaseController.CreateReleaseLink(targetReleaseLinkName, managedNamespace, applicationName, devNamespace, releaseStrategyName)
+			It("Create ReleasePlanAdmission in managed namespace", func() {
+				_, err := framework.ReleaseController.CreateReleasePlanAdmission(releasePlanAdmissionName, managedNamespace, applicationName, devNamespace, environment, releaseStrategyName)
 				Expect(err).NotTo(HaveOccurred())
 			})
 
 			It("Create ReleaseStrategy in managed namespace", func() {
-				_, err := framework.ReleaseController.CreateReleaseStrategy(releaseStrategyName, managedNamespace, missingPipelineName, releasePipelineBundle, releaseStrategyPolicy)
+				strategy, err := framework.ReleaseController.CreateReleaseStrategy(releaseStrategyName, managedNamespace, missingPipelineName, releasePipelineBundle, releaseStrategyPolicy)
+				klog.Infof("%+v", strategy)
 				Expect(err).NotTo(HaveOccurred())
 			})
 
 			It("Create a Release in dev namespace", func() {
-				_, err := framework.ReleaseController.CreateRelease(releaseName, devNamespace, snapshotName, sourceReleaseLinkName)
+				_, err := framework.ReleaseController.CreateRelease(releaseName, devNamespace, snapshotName, releasePlanName)
 				Expect(err).NotTo(HaveOccurred())
 			})
 		})
@@ -157,8 +158,9 @@ var _ = framework.ReleaseSuiteDescribe("test-release-service-failures", Label("r
 					}
 
 					releaseReason := release.Status.Conditions[0].Reason
+					klog.Info(release.Status.Conditions)
 					return release.IsDone() && meta.IsStatusConditionFalse(release.Status.Conditions, "Succeeded") && Expect(releaseReason).To(Equal("ReleasePipelineFailed"))
-				}, avgPipelineCompletionTime, defaultInterval).Should(BeTrue())
+				}, time.Second*5, defaultInterval).Should(BeTrue())
 			})
 
 			It("Condition message describes an error retrieving pipeline", func() {
@@ -174,7 +176,7 @@ var _ = framework.ReleaseSuiteDescribe("test-release-service-failures", Label("r
 					releaseMessage := release.Status.Conditions[0].Message
 					// could not find object in image with kind: pipeline and name: missing-release-pipeline
 					return Expect(releaseMessage).Should(ContainSubstring("Error retrieving pipeline")) && Expect(releaseMessage).Should(ContainSubstring(tmpMessage))
-				}, avgPipelineCompletionTime, defaultInterval).Should(BeTrue())
+				}, time.Second*5, defaultInterval).Should(BeTrue())
 			})
 		})
 	})
@@ -205,18 +207,18 @@ var _ = framework.ReleaseSuiteDescribe("test-release-service-failures", Label("r
 				Expect(err).NotTo(HaveOccurred())
 			})
 
-			It("Create ReleaseLink in dev namespace", func() {
-				_, err := framework.ReleaseController.CreateReleaseLink(sourceReleaseLinkName, devNamespace, applicationName, managedNamespace, "")
+			It("Create ReleasePlan in dev namespace", func() {
+				_, err := framework.ReleaseController.CreateReleasePlan(releasePlanName, devNamespace, applicationName, managedNamespace)
 				Expect(err).NotTo(HaveOccurred())
 			})
 
-			It("Create ReleaseLink in managed namespace", func() {
-				_, err := framework.ReleaseController.CreateReleaseLink(targetReleaseLinkName, managedNamespace, applicationName, devNamespace, missingReleaseStrategy)
+			It("Create ReleasePlanAdmission in managed namespace", func() {
+				_, err := framework.ReleaseController.CreateReleasePlanAdmission(releasePlanAdmissionName, managedNamespace, applicationName, devNamespace, environment, releaseStrategyName)
 				Expect(err).NotTo(HaveOccurred())
 			})
 
 			It("Create a Release in dev namespace", func() {
-				_, err := framework.ReleaseController.CreateRelease(releaseName, devNamespace, snapshotName, sourceReleaseLinkName)
+				_, err := framework.ReleaseController.CreateRelease(releaseName, devNamespace, snapshotName, releasePlanName)
 				Expect(err).NotTo(HaveOccurred())
 			})
 		})
@@ -224,6 +226,9 @@ var _ = framework.ReleaseSuiteDescribe("test-release-service-failures", Label("r
 		var _ = Describe("A Release must relate to an existing ReleaseStrategy in the managed workspace", func() {
 			It("The Release has failed with the REASON field set to ReleaseValidationError", func() {
 				Eventually(func() bool {
+					pr, err := framework.ReleaseController.GetPipelineRunInNamespace(managedNamespace, releaseName, devNamespace)
+					klog.Infof("%+v", pr)
+
 					release, err := framework.ReleaseController.GetRelease(releaseName, devNamespace)
 
 					// Avoid race condition where release.Status.Conditions field didn't have time to get data
