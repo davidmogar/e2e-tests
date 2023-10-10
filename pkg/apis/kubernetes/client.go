@@ -9,6 +9,7 @@ import (
 	"time"
 
 	toolchainv1alpha1 "github.com/codeready-toolchain/api/api/v1alpha1"
+	release "github.com/davidmogar/release-service/api/v1alpha1"
 	ecp "github.com/enterprise-contract/enterprise-contract-controller/api/v1alpha1"
 	ocpOauth "github.com/openshift/api/config/v1"
 	routev1 "github.com/openshift/api/route/v1"
@@ -23,7 +24,6 @@ import (
 	jvmbuildservice "github.com/redhat-appstudio/jvm-build-service/pkg/apis/jvmbuildservice/v1alpha1"
 	jvmbuildserviceclientset "github.com/redhat-appstudio/jvm-build-service/pkg/client/clientset/versioned"
 	gitopsv1alpha1 "github.com/redhat-appstudio/managed-gitops/backend-shared/apis/managed-gitops/v1alpha1"
-	release "github.com/redhat-appstudio/release-service/api/v1alpha1"
 	rs "github.com/redhat-appstudio/remote-secret/api/v1beta1"
 	spi "github.com/redhat-appstudio/service-provider-integration-operator/api/v1beta1"
 	tekton "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"

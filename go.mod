@@ -8,6 +8,7 @@ require (
 	github.com/codeready-toolchain/api v0.0.0-20230502074949-f8c1d80bac96
 	github.com/codeready-toolchain/toolchain-common v0.0.0-20220523142428-2558e76260fb
 	github.com/codeready-toolchain/toolchain-e2e v0.0.0-20220525131508-60876bfb99d3
+	github.com/davidmogar/release-service v0.0.0-20231009121212-3b57f77670fb
 	github.com/devfile/library/v2 v2.2.1-0.20230418160146-e75481b7eebd
 	github.com/enterprise-contract/enterprise-contract-controller/api v0.0.0-20230327185456-5befd172d558
 	github.com/go-git/go-git/v5 v5.8.1
@@ -33,7 +34,6 @@ require (
 	github.com/redhat-appstudio/integration-service v0.0.0-20230427084439-306b4611389b
 	github.com/redhat-appstudio/jvm-build-service v0.0.0-20230821060312-4172397d68e8
 	github.com/redhat-appstudio/managed-gitops/backend-shared v0.0.0
-	github.com/redhat-appstudio/release-service v0.0.0-20230927145627-e492842a18f8
 	github.com/redhat-appstudio/remote-secret v0.0.0-20230713072146-a6094c712436
 	github.com/redhat-appstudio/service-provider-integration-operator v0.2023.22-0.20230713080056-eae17aa8c172
 	github.com/spf13/cobra v1.7.0
@@ -56,6 +56,8 @@ require (
 	sigs.k8s.io/controller-runtime v0.14.6
 	sigs.k8s.io/yaml v1.3.0
 )
+
+replace github.com/redhat-appstudio/release-service => github.com/davidmogar/release-service v0.0.0-20230926115200-6b1480ca0688
 
 replace (
 	github.com/antlr/antlr4 => github.com/antlr/antlr4 v0.0.0-20211106181442-e4c1a74c66bd

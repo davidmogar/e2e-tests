@@ -7,8 +7,8 @@ import (
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/api/errors"
 
+	releaseApi "github.com/davidmogar/release-service/api/v1alpha1"
 	"github.com/redhat-appstudio/e2e-tests/pkg/framework"
-	releaseApi "github.com/redhat-appstudio/release-service/api/v1alpha1"
 )
 
 var _ = framework.ReleaseSuiteDescribe("[HACBS-2469]test-releaseplan-owner-ref-added", Label("release", "releaseplan-ownerref", "HACBS"), func() {
@@ -24,10 +24,10 @@ var _ = framework.ReleaseSuiteDescribe("[HACBS-2469]test-releaseplan-owner-ref-a
 		Expect(err).NotTo(HaveOccurred())
 		devNamespace = fw.UserNamespace
 
-		_, err = fw.AsKubeAdmin.ReleaseController.CreateReleasePlan(sourceReleasePlanName, devNamespace, applicationNameDefault, "managed", "")
+		_, err = fw.AsKubeAdmin.HasController.CreateApplication(applicationNameDefault, devNamespace)
 		Expect(err).NotTo(HaveOccurred())
 
-		_, err = fw.AsKubeAdmin.HasController.CreateApplication(applicationNameDefault, devNamespace)
+		_, err = fw.AsKubeAdmin.ReleaseController.CreateReleasePlan(sourceReleasePlanName, devNamespace, applicationNameDefault, "managed", "")
 		Expect(err).NotTo(HaveOccurred())
 	})
 

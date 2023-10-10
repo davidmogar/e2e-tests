@@ -1,4 +1,4 @@
-package release
+package pipelines
 
 import (
 	"time"
@@ -26,7 +26,7 @@ const (
 	componentName                        string = "dc-metro-map"
 	buildPipelineBundleDefaultName       string = "build-pipelines-defaults"
 	releaseStrategyPolicyDefault         string = "mvp-policy"
-	releasePipelineServiceAccountDefault string = "release-service-account"
+	releaseStrategyServiceAccountDefault string = "release-service-account"
 	sourceReleasePlanName                string = "source-releaseplan"
 	targetReleasePlanAdmissionName       string = "demo"
 	releasePvcName                       string = "release-pvc"

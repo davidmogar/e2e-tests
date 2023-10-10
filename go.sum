@@ -435,6 +435,8 @@ github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/daviddengcn/go-colortext v0.0.0-20160507010035-511bcaf42ccd/go.mod h1:dv4zxwHi5C/8AeI+4gX4dCWOIvNi7I6JCSX0HvlKPgE=
+github.com/davidmogar/release-service v0.0.0-20231009121212-3b57f77670fb h1:m0gD1kO8BrfcDclKHptm2agIU4uhs/zig+0DUidatSo=
+github.com/davidmogar/release-service v0.0.0-20231009121212-3b57f77670fb/go.mod h1:mZKcIr+mF9VGNyTs5FvHwbNoHfw9q52+f9S6I4iLWrs=
 github.com/denverdino/aliyungo v0.0.0-20190125010748-a747050bb1ba/go.mod h1:dV8lFg6daOBZbT6/BDGIz6Y3WFGn8juu6G+CQ6LHtl0=
 github.com/devfile/api/v2 v2.0.0-20211021164004-dabee4e633ed/go.mod h1:d99eTN6QxgzihOOFyOZA+VpUyD4Q1pYRYHZ/ci9J96Q=
 github.com/devfile/api/v2 v2.0.0-20220117162434-6e6e6a8bc14c/go.mod h1:d99eTN6QxgzihOOFyOZA+VpUyD4Q1pYRYHZ/ci9J96Q=
@@ -1307,8 +1309,6 @@ github.com/redhat-appstudio/managed-gitops/backend-shared v0.0.0-20230825175313-
 github.com/redhat-appstudio/managed-gitops/backend-shared v0.0.0-20230825175313-126ea8674329/go.mod h1:12lI+rL9+laUTAZ8G/fl7ECBRym5q4WqHKcro8ET6Vo=
 github.com/redhat-appstudio/operator-toolkit v0.0.0-20230901144515-eeb937692f03 h1:3cHK+a1D+VwhzGoAnC2HXbjkywT/b8jDDaiew2KgpPw=
 github.com/redhat-appstudio/operator-toolkit v0.0.0-20230901144515-eeb937692f03/go.mod h1:7cX2+4KGZLJ4Yoj+1v0iV5hkCGBzbSd9wkNJQjCdDJs=
-github.com/redhat-appstudio/release-service v0.0.0-20230927145627-e492842a18f8 h1:ai38uzqzp9kuD5bbBdbq1bNMwc1n7+EzOgfAesy8z3o=
-github.com/redhat-appstudio/release-service v0.0.0-20230927145627-e492842a18f8/go.mod h1:U4Qa933BrXLEnudIhCaPp0lBWjevLY2MuvXrl9LIo7U=
 github.com/redhat-appstudio/remote-secret v0.0.0-20230713072146-a6094c712436 h1:6XYknDslXDSVpNqEKnI+gKj3Uu4afK2S+IIH3KogX1E=
 github.com/redhat-appstudio/remote-secret v0.0.0-20230713072146-a6094c712436/go.mod h1:QlcxNg0q63QFGr9ceI3dH7a7vO6gGh+2TJrbTiMf9DE=
 github.com/redhat-appstudio/service-provider-integration-operator v0.2023.22-0.20230713080056-eae17aa8c172 h1:Zibq2RBTzcoDgZcTfM5k2o1qrKuix3YPtYQ/NuP039Y=
