@@ -8,17 +8,17 @@ import (
 	tektonutils "github.com/konflux-ci/release-service/tekton/utils"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
 	appservice "github.com/konflux-ci/application-api/api/v1alpha1"
 	"github.com/konflux-ci/e2e-tests/pkg/framework"
 	"github.com/konflux-ci/e2e-tests/pkg/utils"
-	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	releasecommon "github.com/konflux-ci/e2e-tests/tests/release"
 	releaseApi "github.com/konflux-ci/release-service/api/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 	tektonv1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var _ = framework.ReleaseServiceSuiteDescribe("Release service tenant pipeline", Label("release-service", "tenant"), func() {
@@ -33,7 +33,7 @@ var _ = framework.ReleaseServiceSuiteDescribe("Release service tenant pipeline",
 	var gitSourceURL = "https://github.com/redhat-appstudio-qe/dc-metro-map-release"
 	var gitSourceRevision = "d49914874789147eb2de9bb6a12cd5d150bfff92"
 	var tenantServiceAccountName = "tenant-service-account"
-	var tenantPullSecretName="tenant-pull-secret"
+	var tenantPullSecretName = "tenant-pull-secret"
 
 	var releaseCR *releaseApi.Release
 	var snapshotPush *appservice.Snapshot
@@ -55,7 +55,7 @@ var _ = framework.ReleaseServiceSuiteDescribe("Release service tenant pipeline",
 		Expect(err).ToNot(HaveOccurred())
 
 		_, err = fw.AsKubeAdmin.CommonController.CreateServiceAccount(tenantServiceAccountName, tenantNamespace, []corev1.ObjectReference{{Name: tenantPullSecretName}}, nil)
-                Expect(err).ToNot(HaveOccurred())
+		Expect(err).ToNot(HaveOccurred())
 
 		_, err = fw.AsKubeAdmin.HasController.CreateApplication(releasecommon.ApplicationNameDefault, tenantNamespace)
 		Expect(err).NotTo(HaveOccurred())
@@ -64,7 +64,7 @@ var _ = framework.ReleaseServiceSuiteDescribe("Release service tenant pipeline",
 			"mapping": map[string]interface{}{
 				"components": []map[string]interface{}{
 					{
-						"component": releasecommon.ComponentName,
+						"component":  releasecommon.ComponentName,
 						"repository": releasedImagePushRepo,
 					},
 				},
@@ -73,10 +73,10 @@ var _ = framework.ReleaseServiceSuiteDescribe("Release service tenant pipeline",
 		Expect(err).NotTo(HaveOccurred())
 
 		tenantPipeline := &tektonutils.ParameterizedPipeline{}
-		tenantPipeline.ServiceAccountName = tenantServiceAccountName 
+		tenantPipeline.ServiceAccountName = tenantServiceAccountName
 		tenantPipeline.Timeouts = tektonv1.TimeoutFields{
-                                Pipeline: &metav1.Duration{Duration: 1 * time.Hour},
-                        }
+			Pipeline: &metav1.Duration{Duration: 1 * time.Hour},
+		}
 
 		tenantPipeline.PipelineRef = tektonutils.PipelineRef{
 			Resolver: "git",
@@ -88,14 +88,14 @@ var _ = framework.ReleaseServiceSuiteDescribe("Release service tenant pipeline",
 		}
 
 		_, err = fw.AsKubeAdmin.ReleaseController.CreateReleasePlan(releasecommon.SourceReleasePlanName, tenantNamespace, releasecommon.ApplicationNameDefault, "", "", &runtime.RawExtension{
-                        Raw: data,
-                }, tenantPipeline, nil)
+			Raw: data,
+		}, tenantPipeline, nil)
 		Expect(err).NotTo(HaveOccurred())
 
 		_, err = fw.AsKubeAdmin.TektonController.CreatePVCInAccessMode(releasecommon.ReleasePvcName, tenantNamespace, corev1.ReadWriteOnce)
 		Expect(err).NotTo(HaveOccurred())
 
-		snapshotPush, err = releasecommon.CreateSnapshotWithImageSource(*fw, releasecommon.ComponentName, releasecommon.ApplicationNameDefault, tenantNamespace, sampleImage, gitSourceURL, gitSourceRevision, "", "", "", "")
+		snapshotPush, err = releasecommon.CreateSnapshotWithImageSource(fw.AsKubeAdmin, releasecommon.ComponentName, releasecommon.ApplicationNameDefault, tenantNamespace, sampleImage, gitSourceURL, gitSourceRevision, "", "", "", "")
 		Expect(err).ShouldNot(HaveOccurred())
 		GinkgoWriter.Println("snapshotPush.Name: %s", snapshotPush.GetName())
 	})
